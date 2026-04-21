@@ -45,19 +45,48 @@ def parse_attendance(val):
     return int(float(str(val).strip().replace(".", "")))
 
 
-# Unified team-name map — applied to every dataset so names match on joins
+REPLACEMENT_CHAR = "\ufffd"   # U+FFFD — what the raw CSVs use instead of lost accented chars
+
+def clean_string(s):
+    """
+    Strip Unicode replacement characters (U+FFFD) that are permanently
+    baked into the raw CSVs where accented characters once existed,
+    and remove any HTML parsing artifacts (rn\">) left by the original
+    web-scraping process. Returns clean ASCII text.
+    """
+    if pd.isna(s):
+        return s
+    s = str(s)
+    s = s.replace(REPLACEMENT_CHAR, "")   # remove ? from Pele, Juergen, etc.
+    s = re.sub(r'^rn">', "", s)            # strip HTML artifact prefix
+    return s.strip()
+
+
+# Unified team-name map — applied after clean_string so names are already stripped
 TEAM_MAP = {
-    "Germany FR":           "West Germany",
-    "German DR":            "East Germany",
-    "Republic of Ireland":  "Ireland",
-    "Korea Republic":       "South Korea",
-    "Korea DPR":            "North Korea",
+    # Germany era names
+    "Germany FR":                  "West Germany",
+    "German DR":                   "East Germany",
+    # HTML-artifact team names (rn"> prefix already stripped by clean_string,
+    # but kept here as a safety net in case order changes)
+    "rn\">Republic of Ireland":    "Ireland",
+    "rn\">Bosnia and Herzegovina": "Bosnia and Herzegovina",
+    "rn\">Serbia and Montenegro":  "Serbia and Montenegro",
+    "rn\">Trinidad and Tobago":    "Trinidad and Tobago",
+    "rn\">United Arab Emirates":   "United Arab Emirates",
+    # Iran — two spellings coexist in the raw data
+    "IR Iran":                     "Iran",
+    # Other standardisations
+    "Republic of Ireland":         "Ireland",
+    "Korea Republic":              "South Korea",
+    "Korea DPR":                   "North Korea",
 }
 
 def normalize_team(name):
     if pd.isna(name):
         return name
-    return TEAM_MAP.get(str(name).strip(), str(name).strip())
+    name = clean_string(name)
+    return TEAM_MAP.get(name, name)
 
 
 # Stage → (standard label, sort order 1–6)
@@ -168,9 +197,9 @@ print(f"  Raw: {m_raw.shape}")
 m = m_raw.dropna(subset=["MatchID","Home Team Name","Away Team Name"]).copy()
 print(f"  After removing empty rows: {len(m)}")
 
-# Strip whitespace from every string column
+# Strip whitespace, remove U+FFFD replacement chars, strip HTML artifacts
 for col in m.select_dtypes("object").columns:
-    m[col] = m[col].str.strip()
+    m[col] = m[col].apply(clean_string)
 
 # Resolve 16 duplicate MatchIDs — keep row with Attendance (preferred) else first
 m = (m.sort_values("Attendance", ascending=False)
@@ -293,9 +322,9 @@ print(f"  Raw: {p_raw.shape}")
 
 p = p_raw.copy()
 
-# Strip whitespace
+# Strip whitespace, remove U+FFFD replacement chars, strip HTML artifacts
 for col in p.select_dtypes("object").columns:
-    p[col] = p[col].str.strip()
+    p[col] = p[col].apply(clean_string)
 
 # Drop FULLY identical rows (every column same value — pure data entry duplicates)
 before = len(p)
@@ -309,13 +338,31 @@ p["Shirt Number"] = p["Shirt Number"].replace(0, np.nan)
 p["Is_Captain"] = p["Position"].isin(["C", "GKC"])
 p["Is_GK"]      = p["Position"].isin(["GK", "GKC"])
 
-# Is_Starter vs substitute
-p["Is_Starter"]  = (p["Line-up"] == "S")
+# Is_Starter vs substitute — set initially from Line-up field
+p["Is_Starter"]    = (p["Line-up"] == "S")
 p["Is_Substitute"] = (p["Line-up"] == "N")
 
 # Parse Event column into individual counters
 event_df = pd.DataFrame(p["Event"].apply(parse_events).tolist())
 p = pd.concat([p.reset_index(drop=True), event_df], axis=1)
+
+# FIX ISSUE 5 — Correct Subbed_In/Out contradictions caused by wrong Line-up flags.
+#
+# Rule A: Subbed_In > 0 → player entered mid-match → always a substitute.
+#         Takes highest priority — applied last so it wins all conflicts.
+#
+# Rule B: Subbed_Out > 0 AND Subbed_In = 0 → player started and was replaced.
+#         Only applies when there is NO sub-in event (so we don't mis-classify
+#         players who came on as a sub AND were then taken off, e.g. Battiston 1982).
+#
+# Priority: Rule A overrides Rule B — a player with both events came on as a sub.
+mask_subout_only = (p["Subbed_Out"] > 0) & (p["Subbed_In"] == 0)
+p.loc[mask_subout_only, "Is_Starter"]    = True
+p.loc[mask_subout_only, "Is_Substitute"] = False
+
+mask_subin = p["Subbed_In"] > 0      # applied after Rule B so it wins conflicts
+p.loc[mask_subin, "Is_Starter"]    = False
+p.loc[mask_subin, "Is_Substitute"] = True
 
 # Rename for clarity
 p = p.rename(columns={
@@ -399,6 +446,22 @@ combined["Rest_Days"] = np.where(
     combined["Rest_Days_Away"]
 )
 
+# FIX ISSUE 4 — Goals reliability flag
+# In 200/1672 team-match combos, sum(player Goals) < Team_Goals_For.
+# This happens because the original WorldCupPlayers.csv didn't record which
+# player scored for every goal (common in early tournaments and some later ones).
+# The scoreline columns (Team_Goals_For / Team_Goals_Against) are ALWAYS correct
+# as they come from WorldCupMatches. The player-level Goals column is unreliable
+# for reconstructing scorelines — use it only for individual player analysis.
+# We add a flag so analysts know which rows have complete goal attribution.
+goals_check = (
+    combined.groupby(["MatchID", "Team_Initials"])
+    .apply(lambda g: g["Goals"].sum() == g["Team_Goals_For"].iloc[0])
+    .reset_index()
+    .rename(columns={0: "Goals_Fully_Attributed"})
+)
+combined = combined.merge(goals_check, on=["MatchID", "Team_Initials"], how="left")
+
 # 4d. Join tournament context from cups
 cups_lookup = cups[["Year","Host_Country","Winner","Qualified_Teams",
                      "Tournament_Matches","Tournament_Total_Goals",
@@ -439,7 +502,9 @@ final_cols = [
     "Is_Home_Team", "Is_Host_Team",
 
     # Player events
-    "Goals", "Own_Goals",
+    # NOTE: Goals = player-attributed goals only. Use Team_Goals_For for scorelines.
+    # Goals_Fully_Attributed = True means every goal has a named scorer in this match.
+    "Goals", "Own_Goals", "Goals_Fully_Attributed",
     "Yellow_Cards", "Red_Cards", "Second_Yellow_Red", "Effective_Red_Cards",
     "Suspended_Next_Match",
     "Penalties_Scored", "Missed_Penalties",
