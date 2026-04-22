@@ -8,6 +8,7 @@ Run with: python test.py
 """
 
 import re
+import runpy
 import pandas as pd
 import numpy as np
 from pathlib import Path
@@ -762,16 +763,9 @@ class DataValidator:
 
 
 def main():
-    processed_file = Path('data/processed/wc_players_combined.csv')
-
-    if not processed_file.exists():
-        print(f'❌ ERROR: {processed_file} not found!')
-        print('   Run: python scripts/preprocess.py')
-        return
-
-    validator = DataValidator(processed_file)
-    report    = validator.validate_all()
-    return report
+    # Delegate to the requested v2.0 combined merge & join validation suite
+    suite_path = Path(__file__).with_name('combined_validation_v2.py')
+    runpy.run_path(str(suite_path), run_name='__main__')
 
 
 if __name__ == '__main__':
