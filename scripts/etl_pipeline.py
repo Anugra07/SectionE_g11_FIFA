@@ -240,6 +240,11 @@ def merge_all(cups, matches, players):
     merged = merged.merge(cups, on='Year', how='left')
     log(f'  After adding WorldCups context: {merged.shape[0]} rows')
 
+    # Remove exact duplicate rows created by repeated player/event combinations
+    before = len(merged)
+    merged.drop_duplicates(inplace=True)
+    log(f'  Removed {before - len(merged)} exact duplicate rows → {len(merged)} unique rows')
+
     # Drop the MatchID — it's a join key (ID), not an analytical column
     merged.drop(columns=['MatchID'], inplace=True)
 
@@ -264,6 +269,7 @@ def validate_and_export(df):
 
     assert df.shape[0] >= 5000, f"Row count {df.shape[0]} below 5,000 minimum!"
     assert df.shape[1] == len(EXPECTED_COLUMNS), f"Column mismatch: {df.shape[1]}"
+    assert df.duplicated().sum() == 0, f"Found {df.duplicated().sum()} duplicate rows in final dataset"
     assert df.isnull().sum().sum() == 0 or True  # log nulls, don't fail
 
     nulls = df.isnull().sum()

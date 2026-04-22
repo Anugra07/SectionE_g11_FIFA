@@ -1,0 +1,7 @@
+{
+  "python.defaultInterpreterPath": "/opt/anaconda3/envs/sectione_fifa/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.analysis.extraPaths": [
+    "/opt/anaconda3/envs/sectione_fifa/lib/python3.11/site-packages"
+  ]
+}
