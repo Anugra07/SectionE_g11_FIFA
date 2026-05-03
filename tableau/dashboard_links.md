@@ -12,7 +12,6 @@
 |---|---|
 | **Full Workbook (All 3 Dashboards)** | [https://public.tableau.com/views/FIFAWorldCupAnalytics-84Years/ExecutiveOverview?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link] |
 
-> ⚠️ The URL above must be accessible publicly at the time of submission. Do not set the workbook to private.
 
 ---
 
@@ -60,21 +59,8 @@ Dashboard screenshots are committed to `tableau/screenshots/` in this repository
 
 | File | Dashboard |
 |---|---|
-| `dashboard_01_executive.png` | Executive Overview |
-| `dashboard_02_match.png` | Match Analytics |
-| `dashboard_03_player_team.png` | Player & Team Deep Dive |
+| `dashboard_01` | Executive Overview |
+| `dashboard_02` | Match Analytics |
+| `dashboard_03` | Player & Team Deep Dive |
 
 ---
-
-## ✅ Submission Checklist
-
-- [ ] Tableau workbook published to Tableau Public
-- [ ] Public URL is accessible without login
-- [ ] All 3 dashboards visible in the workbook
-- [ ] At least one interactive filter working on each dashboard
-- [ ] URL added to this file and to the Project Report (Section 9)
-- [ ] Screenshots committed to `tableau/screenshots/`
-
----
-
-*Last updated: May 2026 · Maintained by: Ashish Kumar Yadav · Newton School of Technology*
