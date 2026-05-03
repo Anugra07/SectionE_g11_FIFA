@@ -1,7 +1,6 @@
-# ⚽ FIFA World Cup Analytics
+# FIFA World Cup Analytics
 ### Decoding 84 Years of Football History — 1930 to 2014
-
-> **DVA Capstone 2 · Data Visualization & Analytics · Newton School of Technology**  
+ 
 > Sector: Sports Analytics · Submitted: May 2026
 
 ---
@@ -14,7 +13,7 @@
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 This project is a full end-to-end sports analytics pipeline built on 84 years of FIFA World Cup data — spanning 20 editions, 836 matches, 83 nations, and 7,638 players from 1930 to 2014.
 
@@ -25,19 +24,19 @@ Three raw Kaggle datasets were merged, cleaned, and transformed using a Python E
 
 ---
 
-## 🔗 Quick Links
+## Quick Links
 
 | Asset | Link |
 |---|---|
-| 📊 Tableau Dashboard | [View on Tableau Public](#) ← *Insert URL after publishing* |
-| 📄 Project Report | `reports/project_report.pdf` |
-| 📽️ Presentation Deck | `reports/presentation.pdf` |
+| 📊 Tableau Dashboard | [View on Tableau Public](https://public.tableau.com/views/FIFAWorldCupAnalytics-84Years/ExecutiveOverview?:language=en-US&publish=yes&:sid=&:redirect=auth&:display_count=n&:origin=viz_share_link)
+| 📄 Project Report | [`reports/project_report.pdf`](reports/project_report.pdf) |
+| 📽️ Presentation Deck | [`reports/presentation.pdf`](reports/presentation.pdf) |
 | 📚 Data Dictionary | [`docs/data_dictionary.md`](docs/data_dictionary.md) |
 | 🗃️ Raw Dataset | [Kaggle — abecklas/fifa-world-cup](https://www.kaggle.com/datasets/abecklas/fifa-world-cup) |
 
 ---
 
-## 🗂️ Repository Structure
+## Repository Structure
 
 ```
 FIFA_WorldCup_Analytics/
@@ -84,7 +83,7 @@ FIFA_WorldCup_Analytics/
 
 ---
 
-## 📦 Dataset
+## Dataset
 
 | File | Rows | Columns | Grain |
 |---|---|---|---|
@@ -100,11 +99,9 @@ FIFA_WorldCup_Analytics/
 **Source:** [Kaggle — FIFA World Cup Dataset by abecklas](https://www.kaggle.com/datasets/abecklas/fifa-world-cup)  
 **Coverage:** 1930 – 2014 · 20 editions · 83 nations · 7,638 players · 836 matches
 
-> ⚠️ The files in `data/raw/` are **never modified** after download. All transformations happen in `notebooks/02_cleaning.ipynb` and output to `data/processed/`.
-
 ---
 
-## 🔧 ETL Pipeline
+## ETL Pipeline
 
 All cleaning and transformation was done in Python across 5 Jupyter Notebooks and consolidated in `scripts/etl_pipeline.py`.
 
@@ -130,7 +127,7 @@ WorldCupPlayers  (37,784 rows)
 | 5 | Goals and attendance stored as `float` | Cast to `int` after blank row removal |
 | 6 | `attendance` — 2 missing values | Filled with year-level median |
 | 7 | `win_conditions` — empty string for normal results | Replaced with `'Normal'` |
-| 8 | `shirt_number` — value `0` used as unknown | Replaced `0` with `NaN` |
+| 8 | `shirt_number` — value `0` used as unknown | Replaced `0` with `('Unknown')` |
 | 9 | `position` — 33,641 nulls (pre-1980s unrecorded) | `fillna('Unknown')` |
 | 10 | `event` — 28,715 nulls (no action recorded) | `fillna('No Event')` |
 | 11 | `line_up` — opaque codes `S` / `N` | Mapped to `Starting` / `Substitute` |
@@ -155,7 +152,7 @@ New columns created during the pipeline:
 
 ---
 
-## 📊 KPI Framework
+## KPI Framework
 
 Four KPI tables were computed in `notebooks/05_final_load_prep.ipynb`:
 
@@ -173,7 +170,7 @@ Four KPI tables were computed in `notebooks/05_final_load_prep.ipynb`:
 
 ---
 
-## 🔬 Statistical Analysis
+## Statistical Analysis
 
 All tests in `notebooks/04_statistical_analysis.ipynb` using `scipy` and `statsmodels`:
 
@@ -188,7 +185,7 @@ All tests in `notebooks/04_statistical_analysis.ipynb` using `scipy` and `statsm
 
 ---
 
-## 📈 Tableau Dashboards
+## Tableau Dashboards
 
 Three interactive dashboards published on Tableau Public:
 
@@ -214,7 +211,7 @@ Three interactive dashboards published on Tableau Public:
 
 ---
 
-## 💡 Key Insights
+## Key Insights
 
 1. **Goals are in structural decline** — each decade produces 0.27 fewer goals per match (R² = 0.61). This is driven by tactical evolution, not formatting — FIFA cannot reverse it without rule changes.
 
@@ -234,7 +231,7 @@ Three interactive dashboards published on Tableau Public:
 
 ---
 
-## 🎯 Recommendations
+## Recommendations
 
 | # | Recommendation | For | Expected Impact |
 |---|---|---|---|
@@ -245,7 +242,7 @@ Three interactive dashboards published on Tableau Public:
 
 ---
 
-## ⚙️ How to Run
+## How to Run
 
 ### Prerequisites
 
@@ -257,8 +254,8 @@ pip install pandas numpy matplotlib seaborn scipy statsmodels jupyter
 
 ```bash
 # Clone the repository
-git clone https://github.com/[your-username]/FIFA_WorldCup_Analytics.git
-cd FIFA_WorldCup_Analytics
+git clone https://github.com/Anugra07/SectionE_g11_FIFA.git
+cd SectionE_g11_FIFA
 
 # Run the full ETL pipeline (extraction → cleaning → KPI output)
 python scripts/etl_pipeline.py
@@ -282,7 +279,7 @@ Running `etl_pipeline.py` will produce all five files in `data/processed/`:
 
 ---
 
-## ⚠️ Known Limitations
+## Known Limitations
 
 | # | Limitation | Impact |
 |---|---|---|
@@ -295,7 +292,7 @@ Running `etl_pipeline.py` will produce all five files in `data/processed/`:
 
 ---
 
-## 🚀 Future Scope
+## Future Scope
 
 - **Expand to 2018 & 2022** — validate whether modern-era trends hold post-2014
 - **Integrate Opta/StatsBomb data** — add xG, passes, pressures for process-level analysis
@@ -305,44 +302,26 @@ Running `etl_pipeline.py` will produce all five files in `data/processed/`:
 
 ---
 
-## 👤 Team & Contributions
+## Team & Contributions
 
 | Member | Role | Contributions |
 |---|---|---|
-| **Ashish Kumar Yadav** | Project Lead | Dataset sourcing, ETL pipeline, EDA, statistical analysis, Tableau dashboards, report, presentation |
-| [Member 2] | Data Lead | Dataset sourcing, data dictionary |
-| [Member 3] | ETL Lead | Notebooks 01 & 02 — extraction and cleaning |
-| [Member 4] | Analysis Lead | Notebooks 03 & 04 — EDA and statistical analysis |
-| [Member 5] | Visualization Lead | Tableau dashboard design and publishing |
-| [Member 6] | Strategy Lead | Problem statement, KPI framework, recommendations |
-| [Member 7] | PPT & Quality Lead | Final report, presentation deck, contribution matrix |
+| **Ashish Kumar Yadav** | Strategy Lead | Dataset sourcing, ETL pipeline, EDA, statistical analysis, Tableau dashboards, report, presentation |
+| **Anugra Gupta** | Project Lead | Notebooks 01 & 02 — extraction and cleaning |
+| **Aarsh Bhatnagar** | Analysis Lead | Notebooks 03 & 04 — EDA and statistical analysis |
+| **Shivansh Tiwari** | Visualization Lead | Tableau dashboard design and publishing |
+| **Yuvraj Chandravansi** | Data Lead | Problem statement, KPI framework, recommendations |
+| **Divyansh Bhartia** | PPT & Quality Lead | Final report, presentation deck, contribution matrix |
 
 > All contributions are verifiable via GitHub Insights, PR history, and committed files.
 
 ---
 
-## 📋 Submission Checklist
+## License
 
-- [x] Public repository with correct naming convention
-- [x] All notebooks committed in `.ipynb` format
-- [x] `data/raw/` contains original, unedited datasets
-- [x] `data/processed/` contains cleaned master dataset and 4 KPI tables
-- [x] `docs/data_dictionary.md` is complete
-- [x] `scripts/etl_pipeline.py` is committed and reproducible
-- [x] `tableau/screenshots/` contains dashboard screenshots
-- [ ] `tableau/dashboard_links.md` contains Tableau Public URL ← *Add after publishing*
-- [x] `reports/project_report.pdf` is complete
-- [x] `reports/presentation.pdf` is complete
-- [x] All members have visible commits and pull requests
-
----
-
-## 📜 License
-
-This project is submitted as part of the DVA Capstone 2 at Newton School of Technology.  
+This project is submitted as part of the DVA Capstone at Newton School of Technology.  
 Dataset credit: [abecklas on Kaggle](https://www.kaggle.com/datasets/abecklas/fifa-world-cup)  
 For academic use only.
 
 ---
 
-*Last updated: May 2026 · Maintained by: Ashish Kumar Yadav · Newton School of Technology*
