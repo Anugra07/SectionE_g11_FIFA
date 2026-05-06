@@ -318,10 +318,8 @@ Running `etl_pipeline.py` will produce all five files in `data/processed/`:
 ---
 
 ## License
-
 This project is submitted as part of the DVA Capstone at Newton School of Technology.  
 Dataset credit: [abecklas on Kaggle](https://www.kaggle.com/datasets/abecklas/fifa-world-cup)  
 For academic use only.
-
 ---
 
